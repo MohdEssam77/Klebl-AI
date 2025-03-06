@@ -1,3 +1,3 @@
 # hackathon
-Hackathon 
+Hackathon.
 A project for Klebl GmbH
