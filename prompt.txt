@@ -1,80 +1,52 @@
-You are an AI trained to process construction-related documents. 
-            Extract the following information from the text below into a structured JSON format:
+Extract the following information from the text below into a structured and parsed JSON format with correct German characters in UTF-8.
 
-            - Plankopf: (it is in bottom right corner of the photo) 
-                - Planschlüssel (Plan ID)
-                - Stat.Pos
-                - Auft. Nr
-                - Index
-                - Fertigteil Position
-                - Stück
-                - Volumen (m3)
-                - Gewicht (to)
-            - Vorderansicht: 
-                - Bauteil: (it is found by looking at the first construction drawing and the total width and height)
-		            - Länge „Gesamt“
-                    - Höhe „Gesamt“
-                - Ausklinkung links: (it is in the first construction drawing and in the left side)
-                    - Länge
-                    - Höhe
-                - Ausklinkung rechts: (it is in the first construction drawing and in the right side)
-                    - Länge
-                    - Höhe
-            - Seitenansicht/Draufsicht: (it is in the second construction drawing)
-                - Bauteil:
-                    - Breite
-            - Liste Stahl: 
-                - Pos, Anzahl, Ø, Länge, Bemerkung
-            - Liste Einbauteile: 
-                - Pos, Stck, Bezeichnung
+**Structure of the JSON Object:**
 
-            Return only the JSON object, structured like this:
-            {{
-                "Plankopf": {{
-                    "Planschlüssel": "",
-                    "Stat.Pos": "",
-                    "Auftr. Nr":"",
-                    "Index":"",
-                    "Fertigteil Position":"",
-                    "Stück": 0,
-                    "Volumen (m3)": 0.0,
-                    "Gewicht (to)": 0.0
-                }},
-                "Vorderansicht": {
-                    "Bauteil": {
-                      "Länge_Gesamt": 0.0,
-                      "Höhe_Gesamt": 0.0
-                    },
-                    "Ausklinkung_links": {
-                      "Länge": 0.0,
-                      "Höhe": 0.0
-                    },
-                    "Ausklinkung_rechts": {
-                      "Länge": 0.0,
-                      "Höhe": 0.0
-                    }
-                  },
-                "Seitenansicht_Draufsicht": {
-                    "Bauteil": {
-                      "Breite": 0.0
-                    }
-                  },  
-                "Liste_Stahl": [
-                    {
-                      "Pos": 0,
-                      "Anzahl": 0,
-                      "Ø": 0,
-                      "Länge": 0.0,
-                      "Bemerkung": ""
-                    }
-                  ]
-                ,
-                "Liste_Einbauteile": [
-                    {
-                      "Pos": "",
-                      "Stck": 0,
-                      "Bezeichnung": ""
-                    }
-                  ]
-                }
-            } 
+```json
+{
+  "Plankopf": {
+    "Planschlüssel": "",
+    "Stat.Pos": "",
+    "Auftr. Nr": "",
+    "Index": "",
+    "Fertigteil Position": "",
+    "Stück": 0,
+    "Volumen (m3)": 0.0,
+    "Gewicht (to)": 0.0
+  },
+  "Vorderansicht": {
+    "Bauteil": {
+      "Länge_Gesamt": 0.0,
+      "Höhe_Gesamt": 0.0
+    },
+    "Ausklinkung_links": {
+      "Länge": 0.0,
+      "Höhe": 0.0
+    },
+    "Ausklinkung_rechts": {
+      "Länge": 0.0,
+      "Höhe": 0.0
+    }
+  },
+  "Seitenansicht_Draufsicht": {
+    "Bauteil": {
+      "Breite": 0.0
+    }
+  },
+  "Liste_Stahl": [
+    {
+      "Pos": 0,
+      "Anzahl": 0,
+      "Ø": 0,
+      "Länge": 0.0,
+      "Bemerkung": ""
+    }
+  ],
+  "Liste_Einbauteile": [
+    {
+      "Pos": "",
+      "Stck": 0,
+      "Bezeichnung": ""
+    }
+  ]
+}

@@ -1,201 +1,438 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PDF Digitizer</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Construction Document Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
         }
-        .main-container {
+
+        .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 20px;
+            margin: 0 auto;
+            padding: 2rem;
         }
-        .upload-container {
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             padding: 2rem;
             margin-bottom: 2rem;
         }
-        .result-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            padding: 2rem;
-        }
-        #result {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
-        .custom-file-upload {
-            border: 2px dashed #ddd;
-            border-radius: 5px;
-            padding: 2rem;
+
+        .upload-section {
             text-align: center;
-            cursor: pointer;
+            padding: 2rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
             margin-bottom: 1rem;
         }
-        .custom-file-upload:hover {
-            border-color: #0d6efd;
-            background: #f8f9fa;
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
         }
+
+        .file-label {
+            display: inline-block;
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .file-label:hover {
+            background: var(--secondary-color);
+        }
+
+        .selected-file {
+            margin-top: 1rem;
+            color: #64748b;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+        }
+
         .loading {
             display: none;
-            text-align: center;
             margin: 2rem 0;
+            text-align: center;
         }
-        .loading-spinner {
-            width: 3rem;
-            height: 3rem;
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
-        .file-name {
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .view-controls {
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .view-select {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            font-size: 1rem;
+        }
+
+        .result-container {
+            max-height: 800px;
+            overflow-y: auto;
+            margin-top: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-        .table-container {
-            margin-bottom: 2rem;
-        }
-        .table {
             background: white;
-            margin-bottom: 1rem;
         }
-        .table th {
-            background: #f8f9fa;
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
         }
-        .section-title {
-            color: #0d6efd;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #0d6efd;
+
+        th {
+            background: var(--primary-color);
+            color: white;
         }
-        .table-container {
-            margin-bottom: 2rem;
+
+        tr:nth-child(even) {
+            background: #f8fafc;
         }
-        .table {
+
+        .sub-header {
+            background-color: #f1f5f9;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        #jsonView {
             background: white;
-            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
         }
-        .table th {
-            background: #f8f9fa;
-        }
-        .section-title {
-            color: #0d6efd;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #0d6efd;
+
+        .error {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
         }
     </style>
-        
 </head>
 <body>
-    <div class="main-container">
-        <div class="upload-container">
-            <h1 class="text-center mb-4">Klebl</h1>
-            <form id="uploadForm">
-                <div class="custom-file-upload" id="dropZone">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-cloud-upload mb-3" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383z"/>
-                        <path fill-rule="evenodd" d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3z"/>
-                    </svg>
-                    <h5>Drag & Drop your PDF here</h5>
-                    <p class="text-muted">or click to browse</p>
-                    <input type="file" name="pdf" accept=".pdf" required id="fileInput" style="display: none">
-                </div>
-                <div id="fileName" class="file-name text-center"></div>
-                <button type="submit" class="btn btn-primary w-100">Process PDF</button>
-            </form>
-            
-            <div class="loading" id="loading">
-                <div class="spinner-border loading-spinner text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-3">Processing your PDF...</p>
-            </div>
-        </div>
+    <div class="container">
+        <header class="header">
+            <h1>Construction Document Analyzer</h1>
+            <p>Upload your PDF construction documents for instant analysis</p>
+        </header>
 
-        <div class="result-container" id="resultContainer" style="display: none;">
-            <h3 class="mb-4">Results</h3>
-            <div id="result"></div>
-        </div>
+        <main class="card">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-section">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="pdfFile" class="file-input" accept="application/pdf" required>
+                        <label for="pdfFile" class="file-label">Choose PDF File</label>
+                    </div>
+                    <div id="selectedFile" class="selected-file"></div>
+                    <button type="submit" class="submit-btn">Process Document</button>
+                </div>
+            </form>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processing document...</p>
+            </div>
+
+            <div id="viewControls" class="view-controls">
+                <select id="viewSelect" class="view-select">
+                    <option value="json">JSON View</option>
+                    <option value="table">Table View</option>
+                </select>
+            </div>
+
+            <div class="result-container">
+                <div id="jsonView"></div>
+                <div id="tableView" style="display: none;"></div>
+            </div>
+        </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileName = document.getElementById('fileName');
-        const resultContainer = document.getElementById('resultContainer');
+        let processedData = null;
 
-        // Handle drag and drop
-        dropZone.addEventListener('dragover', (e) => {
+        // File input handling
+        const fileInput = document.getElementById('pdfFile');
+        const selectedFile = document.getElementById('selectedFile');
+        
+        fileInput.addEventListener('change', (e) => {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            selectedFile.textContent = `Selected file: ${fileName}`;
+        });
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            dropZone.style.borderColor = '#0d6efd';
-            dropZone.style.background = '#f8f9fa';
-        });
 
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#ddd';
-            dropZone.style.background = 'white';
-        });
+            const formData = new FormData();
+            const file = fileInput.files[0];
 
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#ddd';
-            dropZone.style.background = 'white';
-            fileInput.files = e.dataTransfer.files;
-            updateFileName();
-        });
-
-        dropZone.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', updateFileName);
-
-        function updateFileName() {
-            if (fileInput.files.length > 0) {
-                fileName.textContent = `Selected file: ${fileInput.files[0].name}`;
-            } else {
-                fileName.textContent = '';
+            if (!file || file.type !== 'application/pdf') {
+                alert('Please select a valid PDF file');
+                return;
             }
-        }
 
-        document.getElementById('uploadForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const form = new FormData(e.target);
+            formData.append('pdf', file);
+
             const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            
+            const viewControls = document.getElementById('viewControls');
+            const tableView = document.getElementById('tableView');
+            const jsonView = document.getElementById('jsonView');
+
             loading.style.display = 'block';
-            resultContainer.style.display = 'none';
-            result.textContent = '';
+            tableView.innerHTML = '';
+            jsonView.innerHTML = '';
+            viewControls.style.display = 'none';
 
             try {
                 const response = await fetch('/process', {
                     method: 'POST',
-                    body: form
+                    body: formData
                 });
-                const data = await response.json();
-                const parsedResult = JSON.parse(data.result);
-                result.textContent = JSON.stringify(parsedResult, null, 2);
-                resultContainer.style.display = 'block';
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                processedData = await response.json();
+                console.log('Received data:', processedData);
+
+                // Display JSON view
+                jsonView.textContent = JSON.stringify(processedData, null, 2);
+
+                // Create and display table view
+                const table = createTable(processedData);
+                if (table) {
+                    tableView.appendChild(table);
+                }
+
+                viewControls.style.display = 'block';
+                // Set JSON as default view
+                document.getElementById('viewSelect').value = 'json';
+                toggleView('json');
             } catch (error) {
-                result.textContent = 'Error processing PDF';
-                resultContainer.style.display = 'block';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Error: ${error.message}`;
+                jsonView.appendChild(errorDiv);
             } finally {
                 loading.style.display = 'none';
             }
-        };
+        });
+
+        // View toggle handling
+        document.getElementById('viewSelect').addEventListener('change', (e) => {
+            toggleView(e.target.value);
+        });
+
+        function toggleView(view) {
+            const tableView = document.getElementById('tableView');
+            const jsonView = document.getElementById('jsonView');
+
+            if (view === 'json') {
+                tableView.style.display = 'none';
+                jsonView.style.display = 'block';
+            } else {
+                tableView.style.display = 'block';
+                jsonView.style.display = 'none';
+            }
+        }
+
+        function createTable(data) {
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+
+            // Plankopf section
+            if (data.Plankopf) {
+                const plankopfHeader = document.createElement('tr');
+                plankopfHeader.innerHTML = `<th colspan="2">Plankopf Details</th>`;
+                tbody.appendChild(plankopfHeader);
+
+                Object.entries(data.Plankopf).forEach(([key, value]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${key}</strong></td>
+                        <td>${value || '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Vorderansicht section
+            if (data.Vorderansicht) {
+                const vorderHeader = document.createElement('tr');
+                vorderHeader.innerHTML = `<th colspan="2">Vorderansicht Details</th>`;
+                tbody.appendChild(vorderHeader);
+
+                Object.entries(data.Vorderansicht).forEach(([section, details]) => {
+                    const sectionRow = document.createElement('tr');
+                    sectionRow.innerHTML = `<td colspan="2" class="sub-header"><strong>${section}</strong></td>`;
+                    tbody.appendChild(sectionRow);
+
+                    Object.entries(details).forEach(([key, value]) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td style="padding-left: 2rem;">${key}</td>
+                            <td>${value || '-'}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                });
+            }
+
+            // Seitenansicht_Draufsicht section
+            if (data.Seitenansicht_Draufsicht) {
+                const seitenHeader = document.createElement('tr');
+                seitenHeader.innerHTML = `<th colspan="2">Seitenansicht/Draufsicht Details</th>`;
+                tbody.appendChild(seitenHeader);
+
+                const bauteil = data.Seitenansicht_Draufsicht.Bauteil;
+                Object.entries(bauteil).forEach(([key, value]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${key}</strong></td>
+                        <td>${value || '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Liste_Einbauteile section
+            if (data.Liste_Einbauteile) {
+                const einbauHeader = document.createElement('tr');
+                einbauHeader.innerHTML = `<th colspan="2">Liste Einbauteile</th>`;
+                tbody.appendChild(einbauHeader);
+
+                // Create headers for Einbauteile
+                const einbauTableHeader = document.createElement('tr');
+                einbauTableHeader.innerHTML = `
+                    <td class="sub-header"><strong>Pos</strong></td>
+                    <td class="sub-header"><strong>Stck / Bezeichnung</strong></td>
+                `;
+                tbody.appendChild(einbauTableHeader);
+
+                data.Liste_Einbauteile.forEach((item) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.Pos}</td>
+                        <td>${item.Stck}x ${item.Bezeichnung}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Liste_Stahl section
+            if (data.Liste_Stahl) {
+                const stahlHeader = document.createElement('tr');
+                stahlHeader.innerHTML = `<th colspan="2">Liste Stahl</th>`;
+                tbody.appendChild(stahlHeader);
+
+                // Create headers for Stahl
+                const stahlTableHeader = document.createElement('tr');
+                stahlTableHeader.innerHTML = `
+                    <td class="sub-header"><strong>Pos</strong></td>
+                    <td class="sub-header"><strong>Details</strong></td>
+                `;
+                tbody.appendChild(stahlTableHeader);
+
+                data.Liste_Stahl.forEach((item) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.Pos}</td>
+                        <td>${item.Anzahl}x Ø${item.Ø}mm, L=${item.Länge}m ${item.Bemerkung}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            table.appendChild(tbody);
+            return table;
+        }
     </script>
 </body>
-</html> 
+</html>
